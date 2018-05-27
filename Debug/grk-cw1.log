@@ -1,0 +1,6 @@
+﻿  main_1_1.cpp
+  Render_Utils.cpp
+  Shader_Loader.cpp
+  Generating Code...
+main_1_1.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
+  grk-cw1.vcxproj -> C:\Users\Mindi\Desktop\GWP-ProjVol\Debug\GWP-Proj.exe
