@@ -45,6 +45,7 @@ GLuint fishTexture;
 
 obj::Model sandModel;
 GLuint sandTexture;
+obj::Model coralModel;
 #pragma endregion
 
 
@@ -113,6 +114,9 @@ void Display()
 	glm::mat4 sandModelMatrix = glm::translate(glm::vec3(0, -3.0f, 0));
 	drawObjectTexture(&sandModel, sandModelMatrix, sandTexture);
 
+	glm::mat4 coralModelMatrix = glm::translate(glm::vec3(0, -1.3f, 0)) * glm::scale(glm::vec3(2.0, 2.0, 2.0));
+	drawObjectColor(&coralModel, coralModelMatrix, glm::vec3(1, 1, 0));
+
 	glutSwapBuffers();
 }
 void Init()
@@ -126,6 +130,8 @@ void Init()
 	//Snad
 	sandModel = obj::loadModelFromFile("models/Sand.obj");
 	sandTexture = Core::LoadTexture("textures/Sand.png");
+
+	coralModel = obj::loadModelFromFile("models/Coral.obj");
 
 	appLoadingTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 }
