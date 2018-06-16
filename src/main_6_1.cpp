@@ -40,13 +40,64 @@ glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -0.9f, -1.0f));
 #pragma endregion
 
 #pragma region Models
-obj::Model fishModel;
-GLuint fishTexture;
+obj::Model fishCorpusModel;
+obj::Model fishHeadModel;
+obj::Model fishTailModel;
+GLuint fishHeadTexture;
+GLuint fishCorpusTexture;
 
 obj::Model sandModel;
 GLuint sandTexture;
 obj::Model coralModel;
 #pragma endregion
+
+#pragma region Hierarchical Transformation
+class HierarchicalMatrix {
+	HierarchicalMatrix *parent;
+	glm::mat4 transformationMatrix;
+
+#pragma region Constructors
+	public :
+		HierarchicalMatrix() {
+			parent = NULL;
+			transformationMatrix = glm::mat4();
+		}
+
+		HierarchicalMatrix(glm::mat4 _transformationMatrix, HierarchicalMatrix *_parent) {
+			transformationMatrix = _transformationMatrix;
+			parent = _parent;
+		}
+#pragma endregion
+
+#pragma region Setters and Getters
+		HierarchicalMatrix * GetParent() {
+			return parent;
+		}
+		void SetParent(HierarchicalMatrix* _newParent) {
+			parent = _newParent;
+		}
+		glm::mat4 GetTransformationMatrix() {
+			return transformationMatrix;
+		}
+		void SetTransformationMatrix(glm::mat4 _newTransformationMatrix) {
+			transformationMatrix = _newTransformationMatrix;
+		}
+#pragma endregion
+
+#pragma region Methods and functions
+		glm::mat4 GetFinalTransformationMatrix() {
+			HierarchicalMatrix *actualMatrix = this->GetParent();
+			glm::mat4 finalTransformMatrix = this->GetTransformationMatrix();
+			while (&actualMatrix == NULL) {
+				finalTransformMatrix *= actualMatrix->GetTransformationMatrix();
+				actualMatrix = actualMatrix->GetParent();
+			}
+			return finalTransformMatrix;
+		}
+#pragma endregion
+};
+#pragma endregion
+
 
 
 glm::mat4 createCameraMatrix()
@@ -97,6 +148,22 @@ void drawObjectTexture(obj::Model * model, glm::mat4 modelMatrix, GLuint texture
 }
 #pragma endregion
 
+#pragma region Drawing complex shapes
+
+void GenerateFish() {
+	//glm::mat4 fishModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) * glm::rotate(-cameraAngle + glm::radians(90.0f), glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.25f));
+
+	glm::mat4 fishHeadMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) * glm::rotate(-cameraAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.25f));
+	drawObjectTexture(&fishHeadModel, fishHeadMatrix, fishHeadTexture);
+
+	glm::mat4 fishCorpusMatrix = fishHeadMatrix * glm::translate(glm::vec3(-0.5782F, 0.012F, 0.0106F));
+	drawObjectTexture(&fishCorpusModel, fishCorpusMatrix, fishCorpusTexture);
+	//drawObjectColor(&fishCorpusModel, fishCorpusModelMatrix, glm::vec3(0, 0, 1));
+}
+
+#pragma endregion
+
+
 #pragma region ProgramFlow
 void Display()
 {
@@ -108,8 +175,7 @@ void Display()
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 
 	//Fish generation
-	glm::mat4 fishModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) * glm::rotate(-cameraAngle + glm::radians(90.0f), glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.25f));
-	drawObjectTexture(&fishModel, fishModelMatrix, fishTexture);
+	GenerateFish();
 
 	glm::mat4 sandModelMatrix = glm::translate(glm::vec3(0, -3.0f, 0));
 	drawObjectTexture(&sandModel, sandModelMatrix, sandTexture);
@@ -125,8 +191,12 @@ void Init()
 	programColor = shaderLoader.CreateProgram("shaders/shader_color.vert", "shaders/shader_color.frag");
 	programTexture = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_tex.frag");
 	//Fish
-	fishModel = obj::loadModelFromFile("models/Fish.obj");
-	fishTexture = Core::LoadTexture("textures/Fish.png");
+	fishHeadModel = obj::loadModelFromFile("models/HeadFix.obj");
+	fishCorpusModel = obj::loadModelFromFile("models/CorpusFix.obj");
+
+	fishHeadTexture = Core::LoadTexture("textures/HeadTexture.png");
+	fishCorpusTexture = Core::LoadTexture("textures/CorpusTexture.png");
+
 	//Snad
 	sandModel = obj::loadModelFromFile("models/Sand.obj");
 	sandTexture = Core::LoadTexture("textures/Sand.png");
