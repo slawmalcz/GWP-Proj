@@ -22,6 +22,7 @@ int Aspect = FULL_WINDOW;
 #pragma region ControlVariables
 float angleSpeed = 0.1f;
 float moveSpeed = 0.1f;
+float AngleBorder = 0.2F;
 #pragma endregion
 #pragma region GlobalVariables
 GLuint programColor;
@@ -45,6 +46,7 @@ obj::Model fishHeadModel;
 obj::Model fishTailModel;
 GLuint fishHeadTexture;
 GLuint fishCorpusTexture;
+GLuint fishTailTexture;
 
 obj::Model sandModel;
 GLuint sandTexture;
@@ -111,6 +113,18 @@ glm::mat4 createCameraMatrix()
 	return Core::createViewMatrix(cameraPos, cameraDir, up);
 }
 
+float GetTime() 
+{
+	return glutGet(GLUT_ELAPSED_TIME) / 1000.0f - appLoadingTime;
+}
+
+glm::mat4 ApplyWaveFunction(glm::vec3 rotationDirection, glm::vec3 pointOfRotation,float borderAngle = 0.2, float sinParamerer = 1)
+{
+	float angle = sinf(GetTime()*sinParamerer) * borderAngle;
+	glm::mat4 retMatrix = glm::translate(-pointOfRotation)*glm::rotate(angle, rotationDirection)*glm::translate(pointOfRotation);
+	return retMatrix;
+}
+
 #pragma region DrawFunctions
 void drawObjectColor(obj::Model * model, glm::mat4 modelMatrix, glm::vec3 color)
 {
@@ -149,16 +163,15 @@ void drawObjectTexture(obj::Model * model, glm::mat4 modelMatrix, GLuint texture
 #pragma endregion
 
 #pragma region Drawing complex shapes
-
 void GenerateFish() {
-	//glm::mat4 fishModelMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) * glm::rotate(-cameraAngle + glm::radians(90.0f), glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.25f));
-
 	glm::mat4 fishHeadMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) * glm::rotate(-cameraAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.25f));
 	drawObjectTexture(&fishHeadModel, fishHeadMatrix, fishHeadTexture);
 
-	glm::mat4 fishCorpusMatrix = fishHeadMatrix * glm::translate(glm::vec3(-0.5782F, 0.012F, 0.0106F));
+	glm::mat4 fishCorpusMatrix = fishHeadMatrix * glm::translate(glm::vec3(-0.5782F, 0.012F, 0.0106F)) * ApplyWaveFunction(glm::vec3(0,1,0), glm::vec3(-0.5782F, 0.012F, 0.0106F));
 	drawObjectTexture(&fishCorpusModel, fishCorpusMatrix, fishCorpusTexture);
-	//drawObjectColor(&fishCorpusModel, fishCorpusModelMatrix, glm::vec3(0, 0, 1));
+	
+	glm::mat4 fishTailMatrix = fishCorpusMatrix * glm::translate(glm::vec3(-0.5704F, 0.041F, 0)) * ApplyWaveFunction(glm::vec3(0, 1, 0), glm::vec3(-0.1, 0, 0),0.4,-1);
+	drawObjectTexture(&fishTailModel, fishTailMatrix, fishTailTexture);
 }
 
 #pragma endregion
@@ -193,9 +206,11 @@ void Init()
 	//Fish
 	fishHeadModel = obj::loadModelFromFile("models/HeadFix.obj");
 	fishCorpusModel = obj::loadModelFromFile("models/CorpusFix.obj");
+	fishTailModel = obj::loadModelFromFile("models/TailFix.obj");
 
 	fishHeadTexture = Core::LoadTexture("textures/HeadTexture.png");
 	fishCorpusTexture = Core::LoadTexture("textures/CorpusTexture.png");
+	fishTailTexture = Core::LoadTexture("textures/TailTexture.png");
 
 	//Snad
 	sandModel = obj::loadModelFromFile("models/Sand.obj");

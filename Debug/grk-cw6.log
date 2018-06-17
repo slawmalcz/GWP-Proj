@@ -1,3 +1,4 @@
 ﻿  main_6_1.cpp
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(175): warning C4305: 'argument': truncation from 'double' to 'float'
 Camera.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   grk-cw6.vcxproj -> C:\Users\Mindi\Desktop\GWP-Proj\GWP-Proj\Debug\grk-cw6.exe
