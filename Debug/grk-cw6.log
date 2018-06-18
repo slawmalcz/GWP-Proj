@@ -1,4 +1,22 @@
 ﻿  main_6_1.cpp
-c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(175): warning C4305: 'argument': truncation from 'double' to 'float'
-Camera.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
-  grk-cw6.vcxproj -> C:\Users\Mindi\Desktop\GWP-Proj\GWP-Proj\Debug\grk-cw6.exe
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(60): error C2143: syntax error: missing ';' before '<'
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(60): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(61): error C2447: '{': missing function header (old-style formal list?)
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(161): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(162): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(213): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(231): error C2065: 'faces': undeclared identifier
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(231): error C2228: left of '.size' must have class/struct/union
+  c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(231): note: type is 'unknown-type'
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(233): error C2065: 'faces': undeclared identifier
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(233): error C2228: left of '.c_str' must have class/struct/union
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(233): error C3861: 'stbi_load': identifier not found
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(239): error C3861: 'stbi_image_free': identifier not found
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(243): error C2065: 'faces': undeclared identifier
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(244): error C3861: 'stbi_image_free': identifier not found
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(300): error C2065: 'skyboxTopTexture': undeclared identifier
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(301): error C2065: 'skyboxBotTexture': undeclared identifier
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(302): error C2065: 'skyboxLeftTexture': undeclared identifier
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(303): error C2065: 'skyboxRightTexture': undeclared identifier
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(304): error C2065: 'skyboxFrontTexture': undeclared identifier
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(305): error C2065: 'skyboxBackTexture': undeclared identifier
