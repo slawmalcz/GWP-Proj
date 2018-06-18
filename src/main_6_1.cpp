@@ -4,15 +4,14 @@
 #include "ext.hpp"
 #include <iostream>
 #include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <vector>
+
 
 #include "Shader_Loader.h"
 #include "Render_Utils.h"
 #include "Camera.h"
 #include "Texture.h"
 
+//Parameters
 #pragma region MenuItemsVariables
 enum
 {
@@ -32,6 +31,7 @@ bool cameraLock = true;
 #pragma region GlobalVariables
 GLuint programColor;
 GLuint programTexture;
+GLuint programSkyBox;
 
 Core::Shader_Loader shaderLoader;
 
@@ -43,10 +43,7 @@ glm::vec3 cameraDir;
 glm::mat4 cameraMatrix, perspectiveMatrix;
 
 glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -0.9f, -1.0f));
-
-int const CORALNUMBERS = 40;
 #pragma endregion
-
 #pragma region Models
 #pragma region Fish
 	obj::Model fishCorpusModel;
@@ -56,31 +53,29 @@ int const CORALNUMBERS = 40;
 	GLuint fishCorpusTexture;
 	GLuint fishTailTexture;
 #pragma endregion
-#pragma region Skybox
-	vector<std::string> faces;
-	{
-		"right.jpg",
-			"left.jpg",
-			"top.jpg",
-			"bottom.jpg",
-			"front.jpg",
-			"back.jpg"
-	};
-#pragma endregion
-
-
 obj::Model sandModel;
 GLuint sandTexture;
 obj::Model coralModel;
+obj::Model skyBoxModel;
+GLuint skyBoxTexture;
+obj::Model stoneModel;
+GLuint stoneTexture;
 #pragma endregion
-
 #pragma region CoralGeneratorParameters
+int const CORALNUMBERS = 40;
 glm::vec3 CoralsLocation [CORALNUMBERS];
 glm::vec3 CoralsScale[CORALNUMBERS];
 glm::vec3 CoralsColor[CORALNUMBERS];
 glm::mat4 CoralsRotationMatrix[CORALNUMBERS];
 #pragma endregion
+#pragma region StoneGeneratorParameters
+int const STONESNUMBER = 40;
+glm::vec3 StonesLocation[STONESNUMBER];
+glm::vec3 StonesScale[STONESNUMBER];
+glm::mat4 StonesRotationMatrix[STONESNUMBER];
+#pragma endregion
 
+//Class
 #pragma region Hierarchical Transformation
 class HierarchicalMatrix {
 	HierarchicalMatrix *parent;
@@ -128,7 +123,8 @@ class HierarchicalMatrix {
 };
 #pragma endregion
 
-
+//Functions
+#pragma region AdditionalFunctions
 glm::mat4 createCameraMatrix()
 {
 	float time = glutGet(GLUT_ELAPSED_TIME) / 1000.0f - appLoadingTime;
@@ -139,19 +135,16 @@ glm::mat4 createCameraMatrix()
 
 	return Core::createViewMatrix(cameraPos, cameraDir, up);
 }
-
 float GetTime() 
 {
 	return glutGet(GLUT_ELAPSED_TIME) / 1000.0f - appLoadingTime;
 }
-
 glm::mat4 ApplyWaveFunction(glm::vec3 rotationDirection, glm::vec3 pointOfRotation,float borderAngle = 0.2, float sinParamerer = 1)
 {
 	float angle = sinf(GetTime()*sinParamerer) * borderAngle;
 	glm::mat4 retMatrix = glm::translate(-pointOfRotation)*glm::rotate(angle, rotationDirection)*glm::translate(pointOfRotation);
 	return retMatrix;
 }
-
 void SetCoralsParameters() {
 	for (int i = 0; i < CORALNUMBERS; i++) {
 		CoralsLocation[i] = glm::vec3(rand()%50 -25, -1.5, rand() % 50 - 25);
@@ -164,7 +157,18 @@ void SetCoralsParameters() {
 		CoralsRotationMatrix[i] = glm::rotate(CoralsAngleY, glm::vec3(1, 0, 0)) * glm::rotate(CoralsAngleX, glm::vec3(0, 1, 0));
 	}
 }
+void SetStoneParameters() {
+	for (int i = 0; i < STONESNUMBER; i++) {
+		StonesLocation[i] = glm::vec3(rand() % 50 - 25, -1.5, rand() % 50 - 25);
+		StonesScale[i] = glm::vec3(rand() % 3 + 3, rand() % 3 + 3, rand() % 3 + 3);
 
+		float CoralsAngleX = ((double)rand() / (RAND_MAX));
+		float CoralsAngleY = ((double)rand() / (RAND_MAX));
+
+		StonesRotationMatrix[i] = glm::rotate(CoralsAngleY, glm::vec3(1, 0, 0)) * glm::rotate(CoralsAngleX, glm::vec3(0, 1, 0));
+	}
+}
+#pragma endregion
 #pragma region DrawFunctions
 void drawObjectColor(obj::Model * model, glm::mat4 modelMatrix, glm::vec3 color)
 {
@@ -174,6 +178,22 @@ void drawObjectColor(obj::Model * model, glm::mat4 modelMatrix, glm::vec3 color)
 
 	glUniform3f(glGetUniformLocation(program, "objectColor"), color.x, color.y, color.z);
 	glUniform3f(glGetUniformLocation(program, "lightDir"), lightDir.x, lightDir.y, lightDir.z);
+
+	glm::mat4 transformation = perspectiveMatrix * cameraMatrix * modelMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(program, "modelViewProjectionMatrix"), 1, GL_FALSE, (float*)&transformation);
+	glUniformMatrix4fv(glGetUniformLocation(program, "modelMatrix"), 1, GL_FALSE, (float*)&modelMatrix);
+
+	Core::DrawModel(model);
+
+	glUseProgram(0);
+}
+void drawObjectSkyBox(obj::Model * model, glm::mat4 modelMatrix, GLuint textureId)
+{
+	GLuint program = programSkyBox;
+
+	glUseProgram(program);
+
+	Core::SetActiveTexture(textureId, "textureSampler", program, 0);
 
 	glm::mat4 transformation = perspectiveMatrix * cameraMatrix * modelMatrix;
 	glUniformMatrix4fv(glGetUniformLocation(program, "modelViewProjectionMatrix"), 1, GL_FALSE, (float*)&transformation);
@@ -201,10 +221,9 @@ void drawObjectTexture(obj::Model * model, glm::mat4 modelMatrix, GLuint texture
 	glUseProgram(0);
 }
 #pragma endregion
-
 #pragma region Drawing complex shapes
 void GenerateFish() {
-	glm::mat4 fishHeadMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) * glm::rotate(-cameraAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.25f));
+	glm::mat4 fishHeadMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) /* glm::rotate(-cameraAngle, glm::vec3(0, 1, 0)) */ * glm::scale(glm::vec3(0.25f));
 	drawObjectTexture(&fishHeadModel, fishHeadMatrix, fishHeadTexture);
 
 	glm::mat4 fishCorpusMatrix = fishHeadMatrix * glm::translate(glm::vec3(-0.5782F, 0.012F, 0.0106F)) * ApplyWaveFunction(glm::vec3(0,1,0), glm::vec3(-0.5782F, 0.012F, 0.0106F));
@@ -220,41 +239,13 @@ void GenerateCoral() {
 		drawObjectColor(&coralModel, coralModelMatrix1, CoralsColor[i]);
 	}
 }
-
-unsigned int loadCubemap()
-{
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-	int width, height, nrChannels;
-	for (unsigned int i = 0; i < faces.size(); i++)
-	{
-		unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-		if (data)
-		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
-			);
-			stbi_image_free(data);
-		}
-		else
-		{
-			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
-			stbi_image_free(data);
-		}
+void GenerateStones() {
+	for (int i = 0; i < STONESNUMBER; i++) {
+		glm::mat4 stoneModelMatrix = glm::translate(StonesLocation[i]) * glm::scale(StonesScale[i]) * StonesRotationMatrix[i];
+		drawObjectTexture(&stoneModel, stoneModelMatrix, stoneTexture);
 	}
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-	return textureID;
 }
 #pragma endregion
-
-
 #pragma region ProgramFlow
 void Display()
 {
@@ -265,6 +256,8 @@ void Display()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 
+	drawObjectSkyBox(&skyBoxModel, glm::mat4(), skyBoxTexture);
+
 	//Fish generation
 	GenerateFish();
 
@@ -272,6 +265,7 @@ void Display()
 	drawObjectTexture(&sandModel, sandModelMatrix, sandTexture);
 
 	GenerateCoral();
+	GenerateStones();
 
 	glutSwapBuffers();
 }
@@ -280,6 +274,7 @@ void Init()
 	glEnable(GL_DEPTH_TEST);
 	programColor = shaderLoader.CreateProgram("shaders/shader_color.vert", "shaders/shader_color.frag");
 	programTexture = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_tex.frag");
+	programSkyBox = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_texSky.frag");
 	//Fish
 	fishHeadModel = obj::loadModelFromFile("models/HeadFix.obj");
 	fishCorpusModel = obj::loadModelFromFile("models/CorpusFix.obj");
@@ -295,17 +290,17 @@ void Init()
 
 	//Coral
 	coralModel = obj::loadModelFromFile("models/Coral.obj");
+	//Stones
+	skyBoxModel = obj::loadModelFromFile("models/SkyBox.obj");
+	skyBoxTexture = Core::LoadTexture("textures/Skybox.png");
 
 	//Skybox
-	skyboxTopTexture = Core::LoadTexture("textures/Skybox.png");
-	skyboxBotTexture = Core::LoadTexture("textures/Skybox.png");
-	skyboxLeftTexture = Core::LoadTexture("textures/Skybox.png");
-	skyboxRightTexture = Core::LoadTexture("textures/Skybox.png");
-	skyboxFrontTexture = Core::LoadTexture("textures/Skybox.png");
-	skyboxBackTexture = Core::LoadTexture("textures/Skybox.png");
+	stoneModel = obj::loadModelFromFile("models/stone.obj");
+	stoneTexture = Core::LoadTexture("textures/stone.png");
 
 	appLoadingTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	SetCoralsParameters();
+	SetStoneParameters();
 }
 void Shutdown()
 {
@@ -317,7 +312,6 @@ void Idle()
 	glutPostRedisplay();
 }
 #pragma endregion
-
 #pragma region ReshapeFunctions
 void Reshape(int width, int height)
 {
@@ -350,7 +344,6 @@ void Reshape(int width, int height)
 	Display();
 }
 #pragma endregion
-
 #pragma region KeyFunctions
 void Keyboard(unsigned char key, int x, int y)
 {
@@ -374,7 +367,6 @@ void SpecialKeys(int key, int x, int y)
 	Reshape(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
 }
 #pragma endregion
-
 #pragma region MenuFunctions
 void Menu(int value)
 {
