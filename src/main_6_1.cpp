@@ -27,6 +27,7 @@ float angleSpeed = 0.1f;
 float moveSpeed = 0.1f;
 float AngleBorder = 0.2F;
 bool cameraLock = true;
+glm::vec3 currentLocation;
 #pragma endregion
 #pragma region GlobalVariables
 GLuint programColor;
@@ -124,6 +125,16 @@ class HierarchicalMatrix {
 #pragma endregion
 
 //Functions
+#pragma region CollisionFunctions
+bool CollisionSkyBox(glm::vec3 _currentLocationDeviation) {
+	if (pow(_currentLocationDeviation.x, 2) + pow(_currentLocationDeviation.z, 2) < pow(23, 2)) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+#pragma endregion
 #pragma region AdditionalFunctions
 glm::mat4 createCameraMatrix()
 {
@@ -167,6 +178,10 @@ void SetStoneParameters() {
 
 		StonesRotationMatrix[i] = glm::rotate(CoralsAngleY, glm::vec3(1, 0, 0)) * glm::rotate(CoralsAngleX, glm::vec3(0, 1, 0));
 	}
+}
+bool CheckCollision(glm::vec3 _currentLocation, glm::vec3 _currentLocationDeviation) {
+	if (CollisionSkyBox(_currentLocationDeviation))return true;
+	return false;
 }
 #pragma endregion
 #pragma region DrawFunctions
@@ -223,7 +238,7 @@ void drawObjectTexture(obj::Model * model, glm::mat4 modelMatrix, GLuint texture
 #pragma endregion
 #pragma region Drawing complex shapes
 void GenerateFish() {
-	glm::mat4 fishHeadMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) /* glm::rotate(-cameraAngle, glm::vec3(0, 1, 0)) */ * glm::scale(glm::vec3(0.25f));
+	glm::mat4 fishHeadMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) * glm::rotate(-cameraAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.25f));
 	drawObjectTexture(&fishHeadModel, fishHeadMatrix, fishHeadTexture);
 
 	glm::mat4 fishCorpusMatrix = fishHeadMatrix * glm::translate(glm::vec3(-0.5782F, 0.012F, 0.0106F)) * ApplyWaveFunction(glm::vec3(0,1,0), glm::vec3(-0.5782F, 0.012F, 0.0106F));
@@ -301,6 +316,7 @@ void Init()
 	appLoadingTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	SetCoralsParameters();
 	SetStoneParameters();
+	currentLocation = glm::vec3(0, 0, 0);
 }
 void Shutdown()
 {
@@ -356,13 +372,35 @@ void Keyboard(unsigned char key, int x, int y)
 }
 void SpecialKeys(int key, int x, int y)
 {
+	glm::vec3 currentLocationDeviation = currentLocation + cameraDir * moveSpeed;
 	switch (key)
 	{
-	case GLUT_KEY_UP:cameraPos += cameraDir * moveSpeed; break;
-	case GLUT_KEY_DOWN:cameraPos -= cameraDir * moveSpeed; break;
-	case GLUT_KEY_LEFT:cameraPos -= glm::cross(cameraDir, glm::vec3(0, 1, 0)) * moveSpeed; break;
-	case GLUT_KEY_RIGHT:cameraPos += glm::cross(cameraDir, glm::vec3(0, 1, 0)) * moveSpeed; break;
+	case GLUT_KEY_UP:
+		currentLocationDeviation = currentLocation + cameraDir * moveSpeed;
+		if (!CheckCollision(currentLocation, currentLocationDeviation)) {
+			cameraPos += cameraDir * moveSpeed;
+		}
+		break;
+	case GLUT_KEY_DOWN:
+		currentLocationDeviation = currentLocation - cameraDir * moveSpeed;
+		if (!CheckCollision(currentLocation, currentLocationDeviation)) {
+			cameraPos -= cameraDir * moveSpeed;
+		}
+		break;
+	case GLUT_KEY_LEFT:
+		currentLocationDeviation = currentLocation - glm::cross(cameraDir, glm::vec3(0, 1, 0)) * moveSpeed;;
+		if (!CheckCollision(currentLocation, currentLocationDeviation)) {
+			cameraPos -= glm::cross(cameraDir, glm::vec3(0, 1, 0)) * moveSpeed;
+		}
+		break;
+	case GLUT_KEY_RIGHT:
+		currentLocationDeviation = currentLocation + glm::cross(cameraDir, glm::vec3(0, 1, 0)) * moveSpeed;;
+		if (!CheckCollision(currentLocation, currentLocationDeviation)) {
+			cameraPos += glm::cross(cameraDir, glm::vec3(0, 1, 0)) * moveSpeed;
+		}
+		break;
 	}
+	currentLocation = cameraPos;
 
 	Reshape(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
 }
