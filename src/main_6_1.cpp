@@ -34,6 +34,7 @@ GLuint programColor;
 GLuint programTexture;
 GLuint programSkyBox;
 GLuint programNormal;
+GLuint programBubble;
 
 Core::Shader_Loader shaderLoader;
 
@@ -56,24 +57,38 @@ glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -0.9f, -1.0f));
 #pragma endregion
 obj::Model sandModel;
 GLuint sandTexture;
+
 obj::Model coralModel;
+
 obj::Model skyBoxModel;
 GLuint skyBoxTexture;
+
 obj::Model stoneModel;
 GLuint stoneTexture;
+
+obj::Model bubbleModel;
+GLuint bubbleTexture;
 #pragma endregion
 #pragma region CoralGeneratorParameters
-int const CORALNUMBERS = 40;
+int const CORALNUMBERS = 80;
 glm::vec3 CoralsLocation [CORALNUMBERS];
 glm::vec3 CoralsScale[CORALNUMBERS];
 glm::vec3 CoralsColor[CORALNUMBERS];
 glm::mat4 CoralsRotationMatrix[CORALNUMBERS];
 #pragma endregion
 #pragma region StoneGeneratorParameters
-int const STONESNUMBER = 40;
+int const STONESNUMBER = 80;
 glm::vec3 StonesLocation[STONESNUMBER];
 glm::vec3 StonesScale[STONESNUMBER];
 glm::mat4 StonesRotationMatrix[STONESNUMBER];
+#pragma endregion
+#pragma region BubbleGeneratorParameters
+int const BUBBLESNUMBER = 200;
+glm::vec3 BubblesLocation[BUBBLESNUMBER];
+glm::vec3 BubblesScale[BUBBLESNUMBER];
+glm::mat4 BubblesRotationMatrix[BUBBLESNUMBER];
+float BubblesLifeSpane[BUBBLESNUMBER];
+glm::vec3 BubbleSeed[BUBBLESNUMBER];
 #pragma endregion
 
 //Class
@@ -158,7 +173,7 @@ glm::mat4 ApplyWaveFunction(glm::vec3 rotationDirection, glm::vec3 pointOfRotati
 }
 void SetCoralsParameters() {
 	for (int i = 0; i < CORALNUMBERS; i++) {
-		CoralsLocation[i] = glm::vec3(rand()%50 -25, -1.5, rand() % 50 - 25);
+		CoralsLocation[i] = glm::vec3(rand()%50 -25, -4, rand() % 50 - 25);
 		CoralsScale[i] = glm::vec3(rand() % 3 + 3, rand() % 3 + 3, rand() % 3 + 3);
 		CoralsColor[i] = glm::vec3(((double)rand() / (RAND_MAX)), ((double)rand() / (RAND_MAX)), ((double)rand() / (RAND_MAX)));
 
@@ -170,13 +185,27 @@ void SetCoralsParameters() {
 }
 void SetStoneParameters() {
 	for (int i = 0; i < STONESNUMBER; i++) {
-		StonesLocation[i] = glm::vec3(rand() % 50 - 25, -1.5, rand() % 50 - 25);
+		StonesLocation[i] = glm::vec3(rand() % 50 - 25, -4, rand() % 50 - 25);
 		StonesScale[i] = glm::vec3(rand() % 3 + 3, rand() % 3 + 3, rand() % 3 + 3);
 
 		float CoralsAngleX = ((double)rand() / (RAND_MAX));
 		float CoralsAngleY = ((double)rand() / (RAND_MAX));
 
 		StonesRotationMatrix[i] = glm::rotate(CoralsAngleY, glm::vec3(1, 0, 0)) * glm::rotate(CoralsAngleX, glm::vec3(0, 1, 0));
+	}
+}
+void SetBubbleParameters() {
+	for (int i = 0; i < BUBBLESNUMBER; i++) {
+		BubblesLocation[i] = glm::vec3(rand() % 50 - 25, rand() % 20 - 25, rand() % 50 - 25);
+		BubblesScale[i] = glm::vec3(rand() % 7+1);
+		BubbleSeed[i] = glm::vec3(rand() % 5, rand() % 5,rand() % 5);
+
+		float BubblesAngleX = ((double)rand() / (RAND_MAX));
+		float BubblesAngleY = ((double)rand() / (RAND_MAX));
+		float BubblesAmgleZ = ((double)rand() / (RAND_MAX));
+		BubblesLifeSpane[i] = GetTime();
+
+		BubblesRotationMatrix[i] = glm::rotate(BubblesAngleY, glm::vec3(1, 0, 0)) * glm::rotate(BubblesAngleX, glm::vec3(0, 1, 0)) * glm::rotate(BubblesAmgleZ, glm::vec3(0,0,1));
 	}
 }
 bool CheckCollision(glm::vec3 _currentLocation, glm::vec3 _currentLocationDeviation) {
@@ -253,16 +282,33 @@ void drawObjectTextureWithNormal(obj::Model * model, glm::mat4 modelMatrix, GLui
 
 	glUseProgram(0);
 }
+void drawObjectBubble(obj::Model * model, glm::mat4 modelMatrix, GLuint textureId)
+{
+	GLuint program = programBubble;
+
+	glUseProgram(program);
+
+	glUniform3f(glGetUniformLocation(program, "lightDir"), lightDir.x, lightDir.y, lightDir.z);
+	Core::SetActiveTexture(textureId, "textureSampler", program, 0);
+
+	glm::mat4 transformation = perspectiveMatrix * cameraMatrix * modelMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(program, "modelViewProjectionMatrix"), 1, GL_FALSE, (float*)&transformation);
+	glUniformMatrix4fv(glGetUniformLocation(program, "modelMatrix"), 1, GL_FALSE, (float*)&modelMatrix);
+
+	Core::DrawModel(model);
+
+	glUseProgram(0);
+}
 #pragma endregion
 #pragma region Drawing complex shapes
 void GenerateFish() {
-	glm::mat4 fishHeadMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) * glm::rotate(-cameraAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.25f));
+	glm::mat4 fishHeadMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) /* glm::rotate(-cameraAngle, glm::vec3(0, 1, 0)) */ * glm::scale(glm::vec3(0.25f));
 	drawObjectTextureWithNormal(&fishHeadModel, fishHeadMatrix, fishDiffuseTexture,fishNormalTexture);
 
-	glm::mat4 fishCorpusMatrix = fishHeadMatrix * glm::translate(glm::vec3(-0.5782F, 0.012F, 0.0106F)) * ApplyWaveFunction(glm::vec3(0,1,0), glm::vec3(-0.5782F, 0.012F, 0.0106F));
+	glm::mat4 fishCorpusMatrix = fishHeadMatrix * ApplyWaveFunction(glm::vec3(0,1,0), glm::vec3(-0.5782F, 0.012F, 0.0106F));
 	drawObjectTextureWithNormal(&fishCorpusModel, fishCorpusMatrix, fishDiffuseTexture, fishNormalTexture);
 	
-	glm::mat4 fishTailMatrix = fishCorpusMatrix * glm::translate(glm::vec3(-0.5704F, 0.041F, 0)) * ApplyWaveFunction(glm::vec3(0, 1, 0), glm::vec3(-0.1, 0, 0),0.4,-1);
+	glm::mat4 fishTailMatrix = fishCorpusMatrix;//* (glm::vec3(0, 1, 0), glm::vec3(-0.1, 0, 0),0.4,-1);
 	drawObjectTextureWithNormal(&fishTailModel, fishTailMatrix, fishDiffuseTexture, fishNormalTexture);
 }
 
@@ -276,6 +322,19 @@ void GenerateStones() {
 	for (int i = 0; i < STONESNUMBER; i++) {
 		glm::mat4 stoneModelMatrix = glm::translate(StonesLocation[i]) * glm::scale(StonesScale[i]) * StonesRotationMatrix[i];
 		drawObjectTexture(&stoneModel, stoneModelMatrix, stoneTexture);
+	}
+}
+void GenerateBubbles() {
+	for (int i = 0; i < BUBBLESNUMBER; i++) {
+		if (BubblesLocation[i].y +(GetTime() - BubblesLifeSpane[i])*BubbleSeed[i].x > 25) BubblesLifeSpane[i] = GetTime();
+		glm::mat4 bubbleModelMatrix = 
+			glm::translate(
+				glm::vec3(
+					BubblesLocation[i].x + sinf(GetTime() * BubbleSeed[i].y), 
+					BubblesLocation[i].y + (GetTime() - BubblesLifeSpane[i]) * BubbleSeed[i].x,
+					BubblesLocation[i].z + cosf(GetTime() * BubbleSeed[i].z)
+				)) * glm::scale(BubblesScale[i]) * BubblesRotationMatrix[i];
+		drawObjectBubble(&bubbleModel, bubbleModelMatrix, bubbleTexture);
 	}
 }
 #pragma endregion
@@ -294,11 +353,12 @@ void Display()
 	//Fish generation
 	GenerateFish();
 
-	glm::mat4 sandModelMatrix = glm::translate(glm::vec3(0, -3.0f, 0));
+	glm::mat4 sandModelMatrix = glm::translate(glm::vec3(0, -3.0f, 0)) * glm::scale(glm::vec3(3,3,3));
 	drawObjectTexture(&sandModel, sandModelMatrix, sandTexture);
 
 	GenerateCoral();
 	GenerateStones();
+	GenerateBubbles();
 
 	glutSwapBuffers();
 }
@@ -309,6 +369,7 @@ void Init()
 	programTexture = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_tex.frag");
 	programSkyBox = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_texSky.frag");
 	programNormal = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_nor.frag");
+	programBubble = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_bub.frag");
 	//Fish
 	fishHeadModel = obj::loadModelFromFile("models/HeadFix.obj");
 	fishCorpusModel = obj::loadModelFromFile("models/CorpusFix.obj");
@@ -318,7 +379,7 @@ void Init()
 	fishNormalTexture = Core::LoadTexture("textures/fish_normal.png");
 
 	//Snad
-	sandModel = obj::loadModelFromFile("models/Sand.obj");
+	sandModel = obj::loadModelFromFile("models/Underwater.obj");
 	sandTexture = Core::LoadTexture("textures/Sand.png");
 
 	//Coral
@@ -331,9 +392,14 @@ void Init()
 	stoneModel = obj::loadModelFromFile("models/stone.obj");
 	stoneTexture = Core::LoadTexture("textures/stone.png");
 
+	//Bubble
+	bubbleModel = obj::loadModelFromFile("models/Bubble.obj");
+	bubbleTexture = Core::LoadTexture("textures/Bubble.png");
+
 	appLoadingTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	SetCoralsParameters();
 	SetStoneParameters();
+	SetBubbleParameters();
 	currentLocation = glm::vec3(0, 0, 0);
 }
 void Shutdown()
