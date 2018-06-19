@@ -33,6 +33,7 @@ glm::vec3 currentLocation;
 GLuint programColor;
 GLuint programTexture;
 GLuint programSkyBox;
+GLuint programNormal;
 
 Core::Shader_Loader shaderLoader;
 
@@ -50,9 +51,8 @@ glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -0.9f, -1.0f));
 	obj::Model fishCorpusModel;
 	obj::Model fishHeadModel;
 	obj::Model fishTailModel;
-	GLuint fishHeadTexture;
-	GLuint fishCorpusTexture;
-	GLuint fishTailTexture;
+	GLuint fishDiffuseTexture;
+	GLuint fishNormalTexture;
 #pragma endregion
 obj::Model sandModel;
 GLuint sandTexture;
@@ -235,17 +235,35 @@ void drawObjectTexture(obj::Model * model, glm::mat4 modelMatrix, GLuint texture
 
 	glUseProgram(0);
 }
+void drawObjectTextureWithNormal(obj::Model * model, glm::mat4 modelMatrix, GLuint textureId, GLuint normalId)
+{
+	GLuint program = programNormal;
+
+	glUseProgram(program);
+
+	glUniform3f(glGetUniformLocation(program, "lightDir"), lightDir.x, lightDir.y, lightDir.z);
+	Core::SetActiveTexture(textureId, "textureSampler", program, 0);
+	Core::SetActiveTexture(normalId, "normalSampler", program, 1);
+
+	glm::mat4 transformation = perspectiveMatrix * cameraMatrix * modelMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(program, "modelViewProjectionMatrix"), 1, GL_FALSE, (float*)&transformation);
+	glUniformMatrix4fv(glGetUniformLocation(program, "modelMatrix"), 1, GL_FALSE, (float*)&modelMatrix);
+
+	Core::DrawModel(model);
+
+	glUseProgram(0);
+}
 #pragma endregion
 #pragma region Drawing complex shapes
 void GenerateFish() {
 	glm::mat4 fishHeadMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) * glm::rotate(-cameraAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.25f));
-	drawObjectTexture(&fishHeadModel, fishHeadMatrix, fishHeadTexture);
+	drawObjectTextureWithNormal(&fishHeadModel, fishHeadMatrix, fishDiffuseTexture,fishNormalTexture);
 
 	glm::mat4 fishCorpusMatrix = fishHeadMatrix * glm::translate(glm::vec3(-0.5782F, 0.012F, 0.0106F)) * ApplyWaveFunction(glm::vec3(0,1,0), glm::vec3(-0.5782F, 0.012F, 0.0106F));
-	drawObjectTexture(&fishCorpusModel, fishCorpusMatrix, fishCorpusTexture);
+	drawObjectTextureWithNormal(&fishCorpusModel, fishCorpusMatrix, fishDiffuseTexture, fishNormalTexture);
 	
 	glm::mat4 fishTailMatrix = fishCorpusMatrix * glm::translate(glm::vec3(-0.5704F, 0.041F, 0)) * ApplyWaveFunction(glm::vec3(0, 1, 0), glm::vec3(-0.1, 0, 0),0.4,-1);
-	drawObjectTexture(&fishTailModel, fishTailMatrix, fishTailTexture);
+	drawObjectTextureWithNormal(&fishTailModel, fishTailMatrix, fishDiffuseTexture, fishNormalTexture);
 }
 
 void GenerateCoral() {
@@ -290,14 +308,14 @@ void Init()
 	programColor = shaderLoader.CreateProgram("shaders/shader_color.vert", "shaders/shader_color.frag");
 	programTexture = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_tex.frag");
 	programSkyBox = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_texSky.frag");
+	programNormal = shaderLoader.CreateProgram("shaders/shader_tex.vert", "shaders/shader_nor.frag");
 	//Fish
 	fishHeadModel = obj::loadModelFromFile("models/HeadFix.obj");
 	fishCorpusModel = obj::loadModelFromFile("models/CorpusFix.obj");
 	fishTailModel = obj::loadModelFromFile("models/TailFix.obj");
 
-	fishHeadTexture = Core::LoadTexture("textures/HeadTexture.png");
-	fishCorpusTexture = Core::LoadTexture("textures/CorpusTexture.png");
-	fishTailTexture = Core::LoadTexture("textures/TailTexture.png");
+	fishDiffuseTexture = Core::LoadTexture("textures/fish_diffuse.png");
+	fishNormalTexture = Core::LoadTexture("textures/fish_normal.png");
 
 	//Snad
 	sandModel = obj::loadModelFromFile("models/Sand.obj");

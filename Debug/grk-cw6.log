@@ -3,6 +3,6 @@ c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(165): warning C4244: '
 c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(166): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
 c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(176): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
 c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(177): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(247): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(265): warning C4305: 'argument': truncation from 'double' to 'float'
 Camera.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   grk-cw6.vcxproj -> C:\Users\Mindi\Desktop\GWP-Proj\GWP-Proj\Debug\grk-cw6.exe
