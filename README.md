@@ -1,8 +1,11 @@
 # GWP-Proj
 
+![alt text](doc/1.png "Dobra rybka nie jest zła")
+![alt text](doc/2.png "Wszystkie rybki śpią w jeziorze...")
+
 ## Wstępny opis
 
-Scena składa się z 2 modelów kamieni, 1 modelu korala, 1 modelu ryby, 1 modelu podłoża. Do każdego obiektu stworzona została tekstsura typu diffuse. Do każdego modelu (z wyjątkiem korala) przygotowana została mapa normalnych. Ryba ma zaimplementowane animacje ogona i głowy. Scena zwiera shadery do obsługi normalnych, skyboxa, coloru, bąbelków (transparencji) oraz tekstur diffuse.
+Scena składa się z 2 modelów kamieni, 1 modelu korala, 1 modelu ryby, 1 modelu podłoża. Do każdego obiektu stworzona została tekstsura typu diffuse. Do każdego modelu (z wyjątkiem korala) przygotowana została mapa normalnych. Ryba ma zaimplementowane animacje ogona i głowy. Scena zwiera shadery do obsługi normalnych, skyboxa, coloru, bąbelków (transparencji) oraz tekstur diffuse. W kodzie zaimplementowano także obsługę ruchu obiektów za pomocą Catmull-Roma, jednakże nie wykorzystano tego do żadnego obiektu (ze względu na brak czasu). Na rybkę działa kolizja skyboxa.
 
 ## Regiony:
 
