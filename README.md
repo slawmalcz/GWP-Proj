@@ -46,3 +46,9 @@ Scena składa się z 2 modelów kamieni, 1 modelu korala, 1 modelu ryby, 1 model
 **KeyFunctions** - funkcje odpowiadające za obsługę wejścia z klawiatury
 
 **MenuFunctions** - funkcje menu (odpowiadające za zmianę rozmiaru ekranu)
+
+## Autorzy
+
+Sławomir Malczewski - 407265
+
+Damian Kaczmarczyk - 430684
