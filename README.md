@@ -50,4 +50,5 @@ Scena składa się z 2 modelów kamieni, 1 modelu korala, 1 modelu ryby, 1 model
 ## Autorzy
 
 Sławomir Malczewski - 407265
+
 Damian Kaczmarczyk - 430684
