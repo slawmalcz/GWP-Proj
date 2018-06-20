@@ -3,40 +3,41 @@
 Scena składa się z 2 modelów kamieni, 1 modelu korala, 1 modelu ryby, 1 modelu podłoża. Do każdego obiektu stworzona została tekstsura typu diffuse. Do każdego modelu (z wyjątkiem korala) przygotowana została mapa normalnych. Ryba ma zaimplementowane animacje ogona i głowy. Scena zwiera shadery do obsługi normalnych, skyboxa, coloru, bąbelków (transparencji) oraz tekstur diffuse.
 
 Regiony:
-MenuItemsVariables - zawiera enum określający aspekt obrazu (panoramiczny, full-window, swobodna kamera), albo wyjście z programu
 
-ControlVariables - zawiera zmienne ruchu, aktualną pozycję kamery, kąt nachylenia
+**MenuItemsVariables** - zawiera enum określający aspekt obrazu (panoramiczny, full-window, swobodna kamera), albo wyjście z programu
 
-GlobalVariables - zawiera zmienne shaderów, pozycję kamery, macierz perspektywy
+**ControlVariables** - zawiera zmienne ruchu, aktualną pozycję kamery, kąt nachylenia
 
-Models - odpowiada za tworzenie zmiennych modeli oraz ich tekstur, zawiera region Fish
+**GlobalVariables** - zawiera zmienne shaderów, pozycję kamery, macierz perspektywy
 
-Fish - zawiera model i tekstury ryby
+**Models** - odpowiada za tworzenie zmiennych modeli oraz ich tekstur, zawiera region Fish
 
-CoralGeneratorParameters - zmienne zawierające parametry generowania korali w losowych miejscach na mapie 
+**Fish** - zawiera model i tekstury ryby
 
-StoneGeneratorParameters - j.w., ale dla kamieni
+**CoralGeneratorParameters** - zmienne zawierające parametry generowania korali w losowych miejscach na mapie 
 
-BubbleGeneratorParameters - j.w., ale losuje również seedy dla trasy ruchu bąbelków 
+**StoneGeneratorParameters** - j.w., ale dla kamieni
 
-Hierarchical Transformation - klasa obsługująca hierarchię macierzy informacji. Zawiera funkcję GetFinalTransform(), która wczytuje  drzewo transformacji (przemnażana jest macierz transformacji rodziców, aż do osiagnięcia korzenia). 
+**BubbleGeneratorParameters** - j.w., ale losuje również seedy dla trasy ruchu bąbelków 
 
-Constructors - należą do klasy Hierarchical Transformation
-Setters and Getters - j.w.
-Methods and functions - j.w.
+**Hierarchical Transformation** - klasa obsługująca hierarchię macierzy informacji. Zawiera funkcję GetFinalTransform(), która wczytuje  drzewo transformacji (przemnażana jest macierz transformacji rodziców, aż do osiagnięcia korzenia). 
 
-CollisionFunctions - zbiór funkcji przeliczających kolizje ryby z obiektami (np.: skyboxem)
+**Constructors** - należą do klasy Hierarchical Transformation
+**Setters and Getters** - j.w.
+**Methods and functions** - j.w.
 
-AdditionalFunctions - dodatkowe funkcje, umożliwiające działanie projektu, takie jak: ApplyWaveFunction(), UseCatmullRom(), CreateCameraMatrix() oraz zestaw setterów dla generatorów parametrów
+**CollisionFunctions** - zbiór funkcji przeliczających kolizje ryby z obiektami (np.: skyboxem)
 
-DrawFunctions - funckej rysujące, korzystające z różnej kombinacji shaderów
+**AdditionalFunctions** - dodatkowe funkcje, umożliwiające działanie projektu, takie jak: ApplyWaveFunction(), UseCatmullRom(), CreateCameraMatrix() oraz zestaw setterów dla generatorów parametrów
 
-Drawing complex shapes - funkcje rysujące zaawansowane kształty (ryba, korale, kamienie skybox) oraz funkcje inicjalizujące działanie programu
+**DrawFunctions** - funckej rysujące, korzystające z różnej kombinacji shaderów
 
-ProgramFlow - funkcja wyświetlania Display(), funkcja inizcjalizująca Init() oraz funkcja zamykająca Shutdown()
+**Drawing complex shapes** - funkcje rysujące zaawansowane kształty (ryba, korale, kamienie skybox) oraz funkcje inicjalizujące działanie programu
 
-ReshapeFunctions - funkcje odpowiadające za zmienianie rozmiaru ekranu (aspect ratio)
+**ProgramFlow** - funkcja wyświetlania Display(), funkcja inizcjalizująca Init() oraz funkcja zamykająca Shutdown()
 
-KeyFunctions - funkcje odpowiadające za obsługę wejścia z klawiatury
+**ReshapeFunctions** - funkcje odpowiadające za zmienianie rozmiaru ekranu (aspect ratio)
 
-MenuFunctions - funkcje menu (odpowiadające za zmianę rozmiaru ekranu)
+**KeyFunctions** - funkcje odpowiadające za obsługę wejścia z klawiatury
+
+**MenuFunctions** - funkcje menu (odpowiadające za zmianę rozmiaru ekranu)
