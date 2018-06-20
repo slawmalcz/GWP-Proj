@@ -57,6 +57,7 @@ glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -0.9f, -1.0f));
 #pragma endregion
 obj::Model sandModel;
 GLuint sandTexture;
+GLuint snadNormal;
 
 obj::Model coralModel;
 
@@ -68,6 +69,10 @@ GLuint stoneTexture;
 
 obj::Model bubbleModel;
 GLuint bubbleTexture;
+
+obj::Model rockModel;
+GLuint rockTexture;
+GLuint rockNormal;
 #pragma endregion
 #pragma region CoralGeneratorParameters
 int const CORALNUMBERS = 80;
@@ -90,6 +95,20 @@ glm::mat4 BubblesRotationMatrix[BUBBLESNUMBER];
 float BubblesLifeSpane[BUBBLESNUMBER];
 glm::vec3 BubbleSeed[BUBBLESNUMBER];
 #pragma endregion
+#pragma region RockGeneratorParameters
+int const ROCKNUMBER = 10;
+glm::vec3 RocksLocation[ROCKNUMBER];
+glm::vec3 RocksScale[ROCKNUMBER];
+glm::mat4 RocksRotationMatrix[ROCKNUMBER];
+#pragma endregion
+#pragma region FishesGenerator
+int const NUMOFFISHES = 20;
+int const NUMOFINTRESTPOINT = 10;
+glm::vec3 IntrestPoint[20][10];
+float currentTimelaps;
+int currentPointOfIntrest;
+#pragma endregion
+
 
 //Class
 #pragma region Hierarchical Transformation
@@ -151,6 +170,16 @@ bool CollisionSkyBox(glm::vec3 _currentLocationDeviation) {
 }
 #pragma endregion
 #pragma region AdditionalFunctions
+glm::vec3 catmullRomCurvature(float t,int object, int pi_1, int pi, int pi1, int pi2) {
+	glm::vec3 ret = 0.5*(
+		glm::vec4(pow(t, 3), pow(t, 2), t, 1) *
+		glm::mat4(-1, 3, -3, 1,
+			2, -5, 4, -1,
+			-1, 0, 1, 0,
+			0, 2, 0, 0) *
+		glm::mat4x3(IntrestPoint[object][pi_1], IntrestPoint[object][pi], IntrestPoint[object][pi1], IntrestPoint[object][pi2]));
+	return ret;
+}
 glm::mat4 createCameraMatrix()
 {
 	float time = glutGet(GLUT_ELAPSED_TIME) / 1000.0f - appLoadingTime;
@@ -170,6 +199,18 @@ glm::mat4 ApplyWaveFunction(glm::vec3 rotationDirection, glm::vec3 pointOfRotati
 	float angle = sinf(GetTime()*sinParamerer) * borderAngle;
 	glm::mat4 retMatrix = glm::translate(-pointOfRotation)*glm::rotate(angle, rotationDirection)*glm::translate(pointOfRotation);
 	return retMatrix;
+}
+glm::vec3 UseOfCatMullRom(int object) {
+	int pi_1 = currentPointOfIntrest - 1;
+	int pi = currentPointOfIntrest;
+	int pi1 = currentPointOfIntrest + 1;
+	int pi2 = currentPointOfIntrest + 2;
+
+	if (pi_1 < 0)pi_1 = NUMOFINTRESTPOINT - 1;
+	if (pi1 >= NUMOFINTRESTPOINT) pi1 = pi1 % NUMOFINTRESTPOINT;
+	if (pi2 >= NUMOFINTRESTPOINT) pi2 = pi2 % NUMOFINTRESTPOINT;
+
+	return catmullRomCurvature(currentTimelaps, object, pi_1, pi, pi1, pi2);
 }
 void SetCoralsParameters() {
 	for (int i = 0; i < CORALNUMBERS; i++) {
@@ -194,6 +235,17 @@ void SetStoneParameters() {
 		StonesRotationMatrix[i] = glm::rotate(CoralsAngleY, glm::vec3(1, 0, 0)) * glm::rotate(CoralsAngleX, glm::vec3(0, 1, 0));
 	}
 }
+void SetRocksParameters() {
+	for (int i = 0; i < ROCKNUMBER; i++) {
+		RocksLocation[i] = glm::vec3(rand() % 50 - 25, -4, rand() % 50 - 25);
+		RocksScale[i] = glm::vec3(1,1,1);
+
+		float CoralsAngleX = ((double)rand() / (RAND_MAX));
+		float CoralsAngleY = ((double)rand() / (RAND_MAX));
+
+		RocksRotationMatrix[i] = glm::rotate(CoralsAngleY, glm::vec3(1, 0, 0)) * glm::rotate(CoralsAngleX, glm::vec3(0, 1, 0));
+	}
+}
 void SetBubbleParameters() {
 	for (int i = 0; i < BUBBLESNUMBER; i++) {
 		BubblesLocation[i] = glm::vec3(rand() % 50 - 25, rand() % 20 - 25, rand() % 50 - 25);
@@ -207,6 +259,15 @@ void SetBubbleParameters() {
 
 		BubblesRotationMatrix[i] = glm::rotate(BubblesAngleY, glm::vec3(1, 0, 0)) * glm::rotate(BubblesAngleX, glm::vec3(0, 1, 0)) * glm::rotate(BubblesAmgleZ, glm::vec3(0,0,1));
 	}
+}
+void SetFishesParameters() {
+	for (int i = 0; i < NUMOFFISHES; i++) {
+		for (int l = 0; l < NUMOFINTRESTPOINT; l++) {
+			IntrestPoint[i][l] = glm::vec3(rand() % 50 - 25, rand() % 50 - 25, rand() % 50 - 25);
+		}
+	}
+	currentTimelaps = 0;
+	currentPointOfIntrest = 0;
 }
 bool CheckCollision(glm::vec3 _currentLocation, glm::vec3 _currentLocationDeviation) {
 	if (CollisionSkyBox(_currentLocationDeviation))return true;
@@ -302,7 +363,7 @@ void drawObjectBubble(obj::Model * model, glm::mat4 modelMatrix, GLuint textureI
 #pragma endregion
 #pragma region Drawing complex shapes
 void GenerateFish() {
-	glm::mat4 fishHeadMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) /* glm::rotate(-cameraAngle, glm::vec3(0, 1, 0)) */ * glm::scale(glm::vec3(0.25f));
+	glm::mat4 fishHeadMatrix = glm::translate(cameraPos + cameraDir * 0.5f + glm::vec3(0, -0.25f, 0)) * glm::rotate(-cameraAngle, glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(0.25f));
 	drawObjectTextureWithNormal(&fishHeadModel, fishHeadMatrix, fishDiffuseTexture,fishNormalTexture);
 
 	glm::mat4 fishCorpusMatrix = fishHeadMatrix * ApplyWaveFunction(glm::vec3(0,1,0), glm::vec3(-0.5782F, 0.012F, 0.0106F));
@@ -311,7 +372,6 @@ void GenerateFish() {
 	glm::mat4 fishTailMatrix = fishCorpusMatrix;//* (glm::vec3(0, 1, 0), glm::vec3(-0.1, 0, 0),0.4,-1);
 	drawObjectTextureWithNormal(&fishTailModel, fishTailMatrix, fishDiffuseTexture, fishNormalTexture);
 }
-
 void GenerateCoral() {
 	for (int i = 0; i < CORALNUMBERS; i++) {
 		glm::mat4 coralModelMatrix1 = glm::translate(CoralsLocation[i]) * glm::scale(CoralsScale[i]) * CoralsRotationMatrix[i];
@@ -322,6 +382,12 @@ void GenerateStones() {
 	for (int i = 0; i < STONESNUMBER; i++) {
 		glm::mat4 stoneModelMatrix = glm::translate(StonesLocation[i]) * glm::scale(StonesScale[i]) * StonesRotationMatrix[i];
 		drawObjectTexture(&stoneModel, stoneModelMatrix, stoneTexture);
+	}
+}
+void GenerateRocks() {
+	for (int i = 0; i < ROCKNUMBER; i++) {
+		glm::mat4 stoneModelMatrix = glm::translate(RocksLocation[i]) * glm::scale(RocksScale[i]) * RocksRotationMatrix[i];
+		drawObjectTextureWithNormal(&rockModel, stoneModelMatrix, rockTexture,rockNormal);
 	}
 }
 void GenerateBubbles() {
@@ -337,6 +403,33 @@ void GenerateBubbles() {
 		drawObjectBubble(&bubbleModel, bubbleModelMatrix, bubbleTexture);
 	}
 }
+void GenerateFishes() {
+	for (int i = 0; i < NUMOFFISHES; i++) {
+		glm::mat4 tempTransform = glm::translate(UseOfCatMullRom(i));
+		//drawObjectTexture();
+	}
+
+	if (currentTimelaps + 0.1 >= 1) {
+		currentTimelaps = 0;
+	}
+	else {
+		currentTimelaps = +0.1;
+	}
+
+	if (currentPointOfIntrest + 1 >= NUMOFINTRESTPOINT) {
+			currentPointOfIntrest = 0;
+	}
+	else {
+		currentPointOfIntrest++;
+	}
+}
+void GenerateSkyBox() {
+	drawObjectSkyBox(&skyBoxModel, glm::mat4(), skyBoxTexture);
+}
+void GenerateSand() {
+	glm::mat4 sandModelMatrix = glm::translate(glm::vec3(0, -3.0f, 0)) * glm::scale(glm::vec3(3, 3, 3));
+	drawObjectTextureWithNormal(&sandModel, sandModelMatrix, sandTexture, snadNormal);
+}
 #pragma endregion
 #pragma region ProgramFlow
 void Display()
@@ -348,17 +441,13 @@ void Display()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 
-	drawObjectSkyBox(&skyBoxModel, glm::mat4(), skyBoxTexture);
-
-	//Fish generation
+	GenerateSkyBox();
 	GenerateFish();
-
-	glm::mat4 sandModelMatrix = glm::translate(glm::vec3(0, -3.0f, 0)) * glm::scale(glm::vec3(3,3,3));
-	drawObjectTexture(&sandModel, sandModelMatrix, sandTexture);
-
+	GenerateSand();
 	GenerateCoral();
 	GenerateStones();
 	GenerateBubbles();
+	GenerateRocks();
 
 	glutSwapBuffers();
 }
@@ -381,14 +470,16 @@ void Init()
 	//Snad
 	sandModel = obj::loadModelFromFile("models/Underwater.obj");
 	sandTexture = Core::LoadTexture("textures/Sand.png");
+	snadNormal = Core::LoadTexture("textures/NormalMapUnderwater.png");
 
 	//Coral
 	coralModel = obj::loadModelFromFile("models/Coral.obj");
-	//Stones
+
+	//Skybox
 	skyBoxModel = obj::loadModelFromFile("models/SkyBox.obj");
 	skyBoxTexture = Core::LoadTexture("textures/Skybox.png");
 
-	//Skybox
+	//Stones
 	stoneModel = obj::loadModelFromFile("models/stone.obj");
 	stoneTexture = Core::LoadTexture("textures/stone.png");
 
@@ -396,10 +487,17 @@ void Init()
 	bubbleModel = obj::loadModelFromFile("models/Bubble.obj");
 	bubbleTexture = Core::LoadTexture("textures/Bubble.png");
 
+	//Rock
+	rockModel = obj::loadModelFromFile("models/Rock.obj");
+	rockTexture = Core::LoadTexture("textures/Rock.png");
+	rockNormal = Core::LoadTexture("textures/NormalMapRock.png");
+
 	appLoadingTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	SetCoralsParameters();
 	SetStoneParameters();
+	SetRocksParameters();
 	SetBubbleParameters();
+	SetFishesParameters();
 	currentLocation = glm::vec3(0, 0, 0);
 }
 void Shutdown()
