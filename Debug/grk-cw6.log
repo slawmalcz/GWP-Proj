@@ -1,14 +1,14 @@
 ﻿  main_6_1.cpp
-c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(221): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(222): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(232): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(233): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(243): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(244): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(252): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(255): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(256): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(257): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(416): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(225): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(226): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(236): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(237): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(247): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(248): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(256): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(259): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(260): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(261): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\mindi\desktop\gwp-proj\gwp-proj\src\main_6_1.cpp(423): warning C4305: '=': truncation from 'double' to 'float'
 Camera.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   grk-cw6.vcxproj -> C:\Users\Mindi\Desktop\GWP-Proj\GWP-Proj\Debug\grk-cw6.exe

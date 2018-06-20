@@ -168,6 +168,10 @@ bool CollisionSkyBox(glm::vec3 _currentLocationDeviation) {
 		return true;
 	}
 }
+bool CheckCollision(glm::vec3 _currentLocation, glm::vec3 _currentLocationDeviation) {
+	if (CollisionSkyBox(_currentLocationDeviation))return true;
+	return false;
+}
 #pragma endregion
 #pragma region AdditionalFunctions
 glm::vec3 catmullRomCurvature(float t,int object, int pi_1, int pi, int pi1, int pi2) {
@@ -268,10 +272,6 @@ void SetFishesParameters() {
 	}
 	currentTimelaps = 0;
 	currentPointOfIntrest = 0;
-}
-bool CheckCollision(glm::vec3 _currentLocation, glm::vec3 _currentLocationDeviation) {
-	if (CollisionSkyBox(_currentLocationDeviation))return true;
-	return false;
 }
 #pragma endregion
 #pragma region DrawFunctions
@@ -406,21 +406,21 @@ void GenerateBubbles() {
 void GenerateFishes() {
 	for (int i = 0; i < NUMOFFISHES; i++) {
 		glm::mat4 tempTransform = glm::translate(UseOfCatMullRom(i));
-		//drawObjectTexture();
+		//TODO:: UseTo draw a fish
+		drawObjectTexture(&fishTailModel,tempTransform,fishDiffuseTexture);
 	}
 
-	if (currentTimelaps + 0.1 >= 1) {
+	if (currentTimelaps + 0.2 >= 1) {
 		currentTimelaps = 0;
+		if (currentPointOfIntrest + 1 >= NUMOFINTRESTPOINT) {
+			currentPointOfIntrest = 0;
+		}
+		else {
+			currentPointOfIntrest++;
+		}
 	}
 	else {
 		currentTimelaps = +0.1;
-	}
-
-	if (currentPointOfIntrest + 1 >= NUMOFINTRESTPOINT) {
-			currentPointOfIntrest = 0;
-	}
-	else {
-		currentPointOfIntrest++;
 	}
 }
 void GenerateSkyBox() {
@@ -448,6 +448,7 @@ void Display()
 	GenerateStones();
 	GenerateBubbles();
 	GenerateRocks();
+	//GenerateFishes();
 
 	glutSwapBuffers();
 }
