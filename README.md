@@ -1,6 +1,6 @@
 # Wstępny opis
 
-Scena składa się z 2 modelów kamieni, 1 modelu korala, 1 modelu ryby, 1 modelu podłoża
+Scena składa się z 2 modelów kamieni, 1 modelu korala, 1 modelu ryby, 1 modelu podłoża. Do każdego obiektu stworzona została tekstsura typu diffuse. Do każdego modelu (z wyjątkiem korala) przygotowana została mapa normalnych. Ryba ma zaimplementowane animacje ogona i głowy. Scena zwiera shadery do obsługi normalnych, skyboxa, coloru, bąbelków (transparencji) oraz tekstur diffuse.
 
 Regiony:
 MenuItemsVariables - zawiera enum określający aspekt obrazu (panoramiczny, full-window, swobodna kamera), albo wyjście z programu
@@ -33,7 +33,10 @@ DrawFunctions - funckej rysujące, korzystające z różnej kombinacji shaderów
 
 Drawing complex shapes - funkcje rysujące zaawansowane kształty (ryba, korale, kamienie skybox) oraz funkcje inicjalizujące działanie programu
 
-ProgramFlow - funkcje wyświetlania 
-ReshapeFunctions - 
-KeyFunctions - 
-MenuFunctions - 
+ProgramFlow - funkcja wyświetlania Display(), funkcja inizcjalizująca Init() oraz funkcja zamykająca Shutdown()
+
+ReshapeFunctions - funkcje odpowiadające za zmienianie rozmiaru ekranu (aspect ratio)
+
+KeyFunctions - funkcje odpowiadające za obsługę wejścia z klawiatury
+
+MenuFunctions - funkcje menu (odpowiadające za zmianę rozmiaru ekranu)
